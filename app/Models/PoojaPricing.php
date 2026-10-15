@@ -10,44 +10,27 @@ class PoojaPricing extends Model
 {
     use HasFactory;
 
-    /**
-     * The database table is intentionally singular.
-     * The migration creates `pooja_pricing`, not Laravel's default
-     * pluralized `pooja_pricings`.
-     */
     protected $table = 'pooja_pricing';
 
     protected $fillable = [
         'pooja_id',
-        'currency_id',
-        'pricing_type',
-        'amount',
-        'discount_amount',
-        'effective_from',
-        'effective_until',
+        'title',
+        'price',
+        'special_price',
+        'description',
+        'includes_samagri',
         'is_default',
-        'is_active',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'amount' => 'decimal:2',
-            'discount_amount' => 'decimal:2',
-            'effective_from' => 'datetime',
-            'effective_until' => 'datetime',
-            'is_default' => 'boolean',
-            'is_active' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'price' => 'decimal:2',
+        'special_price' => 'decimal:2',
+        'includes_samagri' => 'boolean',
+        'is_default' => 'boolean',
+    ];
 
     public function pooja(): BelongsTo
     {
-        return $this->belongsTo(Pooja::class);
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(Pooja::class, 'pooja_id');
     }
 }

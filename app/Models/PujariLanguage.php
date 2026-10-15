@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PujariLanguage extends Model
 {
     use HasFactory;
+
+    protected $table = 'pujari_languages';
 
     protected $fillable = [
         'pujari_profile_id',
@@ -26,11 +29,17 @@ class PujariLanguage extends Model
 
     public function pujariProfile(): BelongsTo
     {
-        return $this->belongsTo(PujariProfile::class);
+        return $this->belongsTo(
+            PujariProfile::class,
+            'pujari_profile_id'
+        );
     }
 
     public function language(): BelongsTo
     {
-        return $this->belongsTo(Language::class);
+        return $this->belongsTo(
+            Language::class,
+            'language_id'
+        );
     }
 }

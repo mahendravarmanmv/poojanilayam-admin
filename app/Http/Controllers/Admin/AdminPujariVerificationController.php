@@ -4,200 +4,371 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PujariProfile;
-use App\Models\PujariVerification;
 use App\Models\User;
-use App\Models\Role;
-use App\Models\Temple;
+use App\Models\UserProfile;
+use App\Models\PujariExperience;
 use App\Models\Language;
+use App\Models\PujariLanguage;
+use App\Models\PujariAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class AdminPujariVerificationController extends Controller
 {
-    public function index(Request $request)
+    private function imageUploadPath(): string
     {
-        $query = PujariProfile::with(['user', 'documents', 'bankAccount']);
-
-        if ($request->filled('status')) {
-            $query->where('verification_status', $request->status);
+        $path = base_path('../public/images/priests');
+        if (!is_dir($path)) {
+            mkdir($path, 0755, true);
         }
+        return realpath($path) ?: $path;
+    }
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%");
+    private function syncDefaultAvailability(int $pujariProfileId, bool $isActive): void
+    {
+        if ($isActive) {
+            $existing = PujariAvailability::where('pujari_profile_id', $pujariProfileId)->get();
+
+            if ($existing->isEmpty()) {
+                for ($day = 0; $day <= 6; $day++) {
+                    PujariAvailability::create([
+                        'pujari_profile_id' => $pujariProfileId,
+                        'day_of_week'       => $day,
+                        'availability_type' => 'recurring',
+                        'start_time'        => '06:00:00',
+                        'end_time'          => '20:00:00',
+                        'status'            => 'available',
+                    ]);
+                }
+            } else {
+                PujariAvailability::where('pujari_profile_id', $pujariProfileId)
+                    ->update(['status' => 'available']);
+            }
+        } else {
+            PujariAvailability::where('pujari_profile_id', $pujariProfileId)
+                ->update(['status' => 'unavailable']);
+        }
+    }
+
+    public function index(Request $request): View
+    {
+        $query = PujariProfile::with(['user.profile', 'experiences', 'languages.language']);
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('display_name', 'like', "%{$search}%")
+                  ->orWhere('pujari_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($uq) use ($search) {
+                      $uq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
             });
         }
 
-        $pujaris = $query->latest()->paginate(15)->withQueryString();
+        if ($status = $request->input('status')) {
+            $query->where('verification_status', $status);
+        }
+
+        $pujaris = $query->orderByDesc('id')->paginate(15)->withQueryString();
 
         return view('admin.verifications.pujaris.index', compact('pujaris'));
     }
 
-    public function create()
+    public function create(): View
     {
-        $temples = Temple::all();
-        $languages = Language::all();
-        return view('admin.verifications.pujaris.create', compact('temples', 'languages'));
+        $languages = Language::orderBy('name')->get();
+        return view('admin.verifications.pujaris.create', compact('languages'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'                 => 'required|string|max:255',
-            'email'                => 'required|email|unique:users,email',
-            'mobile'               => 'required|string|unique:users,mobile',
-            'password'             => 'required|string|min:8',
-            'experience_years'     => 'required|integer|min:0',
-            'about'                => 'nullable|string',
-            'verification_status' => 'required|in:pending,verified,approved,rejected,suspended',
-            'temple_id'            => 'nullable|exists:temples,id',
-            'languages'            => 'nullable|array',
+            'name' => 'required|string|max:255',
+            'display_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'experience_years' => 'required|integer|min:0|max:70',
+            'bio' => 'nullable|string|max:2000',
+            'specialization' => 'nullable|string|max:255',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'languages' => 'nullable|array',
+            'languages.*' => 'integer',
+            'is_active' => 'nullable',
+            'verification_status' => 'required|in:pending,approved,rejected',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            // 1. Create Base User Account
+        DB::transaction(function () use ($request, $validated) {
+            // 1. Create User
             $user = User::create([
-                'name'     => $validated['name'],
-                'email'    => $validated['email'],
-                'mobile'   => $validated['mobile'],
-                'password' => Hash::make($validated['password']),
-                'status'   => 'active',
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make(Str::random(16)),
+                'user_type' => 'pujari',
             ]);
 
-            // Assign Priest/Pujari Role if exists
-            $pujariRole = Role::where('slug', 'pujari')->first();
-            if ($pujariRole) {
-                $user->roles()->syncWithoutDetaching([$pujariRole->id]);
+            // 2. Upload photo
+            $photoPath = null;
+            if ($request->hasFile('profile_photo')) {
+                $file = $request->file('profile_photo');
+                $filename = 'priest_' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+                $file->move($this->imageUploadPath(), $filename);
+                $photoPath = 'images/priests/' . $filename;
             }
 
-            // 2. Create Pujari Profile
-            $profile = PujariProfile::create([
-                'user_id'             => $user->id,
-                'experience_years'    => $validated['experience_years'],
-                'about'               => $validated['about'] ?? null,
+            // 3. UserProfile
+            $nameParts = explode(' ', trim($validated['name']), 2);
+            UserProfile::create([
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0],
+                'last_name' => $nameParts[1] ?? '',
+                'display_name' => $validated['display_name'],
+                'profile_photo' => $photoPath,
+            ]);
+
+            // 4. PujariProfile
+            $pujariNumber = 'PUJ-' . strtoupper(Str::random(6));
+            $isActive = $request->boolean('is_active');
+
+            $pujariData = [
+                'user_id' => $user->id,
+                'pujari_number' => $pujariNumber,
+                'display_name' => $validated['display_name'],
+                'experience_years' => $validated['experience_years'],
+                'bio' => $validated['bio'] ?? null,
+                'is_active' => $isActive,
+                'profile_status' => 'active',
                 'verification_status' => $validated['verification_status'],
-            ]);
+            ];
 
-            // 3. Assign to Temple if selected
-            if (!empty($validated['temple_id'])) {
-                $profile->templeAssignments()->create([
-                    'temple_id'   => $validated['temple_id'],
-                    'status'      => 'active',
-                    'assigned_at' => now(),
+            if (Schema::hasColumn('pujari_profiles', 'phone')) {
+                $pujariData['phone'] = $validated['phone'] ?? null;
+            }
+
+            $priest = PujariProfile::create($pujariData);
+
+            // 5. Specialization
+            if (!empty($validated['specialization'])) {
+                PujariExperience::create([
+                    'pujari_profile_id' => $priest->id,
+                    'title' => $validated['specialization'],
+                    'experience_years' => $validated['experience_years'],
+                    'is_current' => true,
                 ]);
             }
 
-            // 4. Record Verification Log if created as verified
-            if ($validated['verification_status'] === 'verified') {
-                PujariVerification::create([
-                    'pujari_profile_id' => $profile->id,
-                    'verified_by'       => auth()->id(),
-                    'status'            => 'verified',
-                    'remarks'           => 'Verified upon profile creation by Administrator',
-                    'verified_at'       => now(),
-                ]);
+            // 6. Languages sync
+            if (!empty($validated['languages'])) {
+                foreach ($validated['languages'] as $langId) {
+                    PujariLanguage::create([
+                        'pujari_profile_id' => $priest->id,
+                        'language_id'       => (int) $langId,
+                    ]);
+                }
             }
+
+            // 7. Seed recurring availability
+            $this->syncDefaultAvailability($priest->id, $isActive);
         });
 
-        return redirect()->route('admin.verifications.pujaris.index')->with('success', 'Priest created successfully.');
+        return redirect()->route('admin.verifications.pujaris.index')
+            ->with('success', 'Priest created and synchronized with the frontend directory.');
     }
 
-    public function show(PujariProfile $pujari)
+    public function show($id): View
     {
-        $pujari->load(['user', 'documents', 'bankAccount', 'languages', 'experiences', 'templeAssignments.temple']);
+        $pujari = PujariProfile::with([
+            'user.profile',
+            'experiences',
+            'languages.language',
+            'templeAssignments.temple',
+            'availabilities'
+        ])->findOrFail($id);
+
         return view('admin.verifications.pujaris.show', compact('pujari'));
     }
 
-    public function edit(PujariProfile $pujari)
+    public function edit($id): View
     {
-        $pujari->load(['user', 'templeAssignments']);
-        $temples = Temple::all();
-        return view('admin.verifications.pujaris.edit', compact('pujari', 'temples'));
+        $pujari = PujariProfile::with(['user.profile', 'experiences', 'languages'])->findOrFail($id);
+        $languages = Language::orderBy('name')->get();
+        $selectedLanguages = $pujari->languages->pluck('language_id')->map(fn($v) => (int)$v)->toArray();
+        $specialization = $pujari->experiences->pluck('title')->first() ?? '';
+
+        $phone = $pujari->phone ?? '';
+
+        return view('admin.verifications.pujaris.edit', compact(
+            'pujari',
+            'languages',
+            'selectedLanguages',
+            'specialization',
+            'phone'
+        ));
     }
 
-    public function update(Request $request, PujariProfile $pujari)
+    public function update(Request $request, $id): RedirectResponse
     {
+        $pujari = PujariProfile::findOrFail($id);
+        $user = $pujari->user;
+        $profile = $user?->profile;
+
         $validated = $request->validate([
-            'name'                => 'required|string|max:255',
-            'email'               => 'required|email|unique:users,email,' . $pujari->user_id,
-            'mobile'              => 'required|string|unique:users,mobile,' . $pujari->user_id,
-            'password'            => 'nullable|string|min:8',
-            'experience_years'    => 'required|integer|min:0',
-            'about'               => 'nullable|string',
-            'verification_status' => 'required|in:pending,approved,verified,rejected,suspended',
-            'temple_id'           => 'nullable|exists:temples,id',
+            'name' => 'required|string|max:255',
+            'display_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . ($user->id ?? 0),
+            'phone' => 'nullable|string|max:20',
+            'experience_years' => 'required|integer|min:0|max:70',
+            'bio' => 'nullable|string|max:2000',
+            'specialization' => 'nullable|string|max:255',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'languages' => 'nullable|array',
+            'languages.*' => 'integer',
+            'is_active' => 'nullable',
+            'verification_status' => 'required|in:pending,approved,rejected',
         ]);
 
-        DB::transaction(function () use ($pujari, $validated) {
-            $userData = [
-                'name'   => $validated['name'],
-                'email'  => $validated['email'],
-                'mobile' => $validated['mobile'],
+        DB::transaction(function () use ($request, $validated, $pujari, $user, $profile) {
+            // Update User
+            if ($user) {
+                $user->update([
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                ]);
+            }
+
+            // Photo Replacement
+            if ($request->hasFile('profile_photo')) {
+                if ($profile && $profile->profile_photo) {
+                    $oldFile = base_path('../public/' . $profile->profile_photo);
+                    if (file_exists($oldFile) && is_file($oldFile)) {
+                        @unlink($oldFile);
+                    }
+                }
+
+                $file = $request->file('profile_photo');
+                $filename = 'priest_' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+                $file->move($this->imageUploadPath(), $filename);
+
+                if ($profile) {
+                    $profile->update([
+                        'profile_photo' => 'images/priests/' . $filename,
+                        'display_name' => $validated['display_name'],
+                    ]);
+                } else if ($user) {
+                    UserProfile::create([
+                        'user_id' => $user->id,
+                        'display_name' => $validated['display_name'],
+                        'profile_photo' => 'images/priests/' . $filename,
+                    ]);
+                }
+            } else if ($profile) {
+                $profile->update(['display_name' => $validated['display_name']]);
+            }
+
+            $isActive = $request->boolean('is_active');
+
+            // Update Pujari Profile
+            $pujariData = [
+                'display_name' => $validated['display_name'],
+                'experience_years' => $validated['experience_years'],
+                'bio' => $validated['bio'] ?? null,
+                'is_active' => $isActive,
+                'profile_status' => 'active',
+                'verification_status' => $validated['verification_status'],
             ];
 
-            if (!empty($validated['password'])) {
-                $userData['password'] = Hash::make($validated['password']);
+            if (Schema::hasColumn('pujari_profiles', 'phone')) {
+                $pujariData['phone'] = $validated['phone'] ?? null;
             }
 
-            $pujari->user->update($userData);
+            $pujari->update($pujariData);
 
-            // Normalize 'verified' to 'approved' for frontend consistency
-            $status = ($validated['verification_status'] === 'verified') ? 'approved' : $validated['verification_status'];
-
-            $pujari->update([
-                'experience_years'    => $validated['experience_years'],
-                'about'               => $validated['about'] ?? null,
-                'verification_status' => $status,
-            ]);
-
-            if (!empty($validated['temple_id'])) {
-                $pujari->templeAssignments()->updateOrCreate(
-                    ['pujari_profile_id' => $pujari->id],
-                    ['temple_id' => $validated['temple_id'], 'status' => 'active']
-                );
+            // Specialization
+            if (!empty($validated['specialization'])) {
+                $firstExp = $pujari->experiences()->first();
+                if ($firstExp) {
+                    $firstExp->update([
+                        'title' => $validated['specialization'],
+                        'experience_years' => $validated['experience_years'],
+                    ]);
+                } else {
+                    PujariExperience::create([
+                        'pujari_profile_id' => $pujari->id,
+                        'title' => $validated['specialization'],
+                        'experience_years' => $validated['experience_years'],
+                        'is_current' => true,
+                    ]);
+                }
             }
+
+            // Sync Languages: wipe and re-attach
+            $pujari->languages()->delete();
+            if (!empty($validated['languages'])) {
+                foreach ($validated['languages'] as $langId) {
+                    PujariLanguage::create([
+                        'pujari_profile_id' => $pujari->id,
+                        'language_id'       => (int) $langId,
+                    ]);
+                }
+            }
+
+            // Sync availability
+            $this->syncDefaultAvailability($pujari->id, $isActive);
         });
 
-        return redirect()->route('admin.verifications.pujaris.index')->with('success', 'Priest profile updated successfully.');
+        return redirect()->route('admin.verifications.pujaris.index')
+            ->with('success', 'Priest updated successfully.');
     }
 
-    public function updateVerification(Request $request, PujariProfile $pujari)
+    public function updateVerification(Request $request, $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'status'  => 'required|in:approved,verified,rejected,suspended,pending',
-            'remarks' => 'required|string|max:1000',
+        $request->validate([
+            'verification_status' => 'required|in:pending,approved,rejected',
         ]);
 
-        $status = ($validated['status'] === 'verified') ? 'approved' : $validated['status'];
+        $pujari = PujariProfile::findOrFail($id);
+        $pujari->update([
+            'verification_status' => $request->input('verification_status'),
+            'profile_status' => 'active',
+        ]);
 
-        DB::transaction(function () use ($pujari, $status, $validated) {
-            $pujari->update(['verification_status' => $status]);
-
-            PujariVerification::create([
-                'pujari_profile_id' => $pujari->id,
-                'verified_by'       => auth()->id(),
-                'status'            => $status,
-                'remarks'           => $validated['remarks'],
-                'verified_at'       => now(),
-            ]);
-        });
-
-        return redirect()->route('admin.verifications.pujaris.show', $pujari)->with('success', 'Pujari status updated.');
+        return back()->with('success', 'Priest status updated to ' . ucfirst($request->input('verification_status')));
     }
 
-    public function destroy(PujariProfile $pujari)
+    public function destroy($id): RedirectResponse
     {
+        $pujari = PujariProfile::findOrFail($id);
+
         DB::transaction(function () use ($pujari) {
+            $user = $pujari->user;
+            $profile = $user?->profile;
+
+            if ($profile && $profile->profile_photo) {
+                $photoPath = base_path('../public/' . $profile->profile_photo);
+                if (file_exists($photoPath) && is_file($photoPath)) {
+                    @unlink($photoPath);
+                }
+            }
+
+            $pujari->experiences()->delete();
+            $pujari->languages()->delete();
+            $pujari->availabilities()->delete();
+            $pujari->templeAssignments()->delete();
             $pujari->delete();
-            if ($pujari->user) {
-                $pujari->user->update(['status' => 'inactive']);
+
+            if ($profile) {
+                $profile->delete();
+            }
+            if ($user) {
+                $user->delete();
             }
         });
 
-        return redirect()->route('admin.verifications.pujaris.index')->with('success', 'Priest removed successfully.');
+        return redirect()->route('admin.verifications.pujaris.index')
+            ->with('success', 'Priest deleted successfully.');
     }
 }

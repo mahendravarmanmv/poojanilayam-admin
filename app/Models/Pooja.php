@@ -4,91 +4,53 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pooja extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+
+    protected $table = 'poojas';
 
     protected $fillable = [
-        'pooja_code',
-        'pooja_category_id',
+        'category_id',
         'name',
         'slug',
         'short_description',
-        'description',
-        'duration_minutes',
-        'status',
-        'is_featured',
-        'is_active',
-        'sort_order',
+        'is_popular',
+        'is_temple_pooja',
+        'status', // 'active', 'inactive'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'duration_minutes' => 'integer',
-            'is_featured' => 'boolean',
-            'is_active' => 'boolean',
-            'sort_order' => 'integer',
-        ];
-    }
+    protected $casts = [
+        'is_popular' => 'boolean',
+        'is_temple_pooja' => 'boolean',
+    ];
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(PoojaCategory::class, 'pooja_category_id');
+        return $this->belongsTo(PoojaCategory::class, 'category_id');
     }
 
-    public function gods(): BelongsToMany
+    public function details(): HasOne
     {
-        return $this->belongsToMany(
-            God::class,
-            'god_poojas',
-            'pooja_id',
-            'god_id'
-        )->withPivot([
-            'sort_order',
-            'is_primary',
-            'is_active',
-        ])->withTimestamps();
+        return $this->hasOne(PoojaDetail::class, 'pooja_id');
     }
 
-    public function godPoojas(): HasMany
+    public function pricings(): HasMany
     {
-        return $this->hasMany(GodPooja::class);
-    }
-
-    public function detail(): HasOne
-    {
-        return $this->hasOne(PoojaDetail::class);
-    }
-
-    public function pricing(): HasMany
-    {
-        return $this->hasMany(PoojaPricing::class);
-    }
-
-    public function extras(): HasMany
-    {
-        return $this->hasMany(PoojaExtra::class);
+        return $this->hasMany(PoojaPricing::class, 'pooja_id');
     }
 
     public function media(): HasMany
     {
-        return $this->hasMany(PoojaMedia::class);
+        return $this->hasMany(PoojaMedia::class, 'pooja_id');
     }
 
-    public function requirements(): HasMany
+    public function primaryMedia(): HasOne
     {
-        return $this->hasMany(PoojaRequirement::class);
-    }
-
-    public function templePoojas(): HasMany
-    {
-        return $this->hasMany(TemplePooja::class);
+        return $this->hasOne(PoojaMedia::class, 'pooja_id')->where('is_primary', true);
     }
 }

@@ -10,17 +10,24 @@ class PoojaDetail extends Model
 {
     use HasFactory;
 
+    protected $table = 'pooja_details';
+
     protected $fillable = [
         'pooja_id',
-        'benefits',
+        'significance',
         'procedure',
-        'special_instructions',
-        'eligibility',
-        'notes',
+        'duration_minutes',
+        'samagri_list',
+        'instructions',
+    ];
+
+    protected $casts = [
+        'samagri_list' => 'array',
+        'duration_minutes' => 'integer',
     ];
 
     public function pooja(): BelongsTo
     {
-        return $this->belongsTo(Pooja::class);
+        return $this->belongsTo(Pooja::class, 'pooja_id');
     }
 }

@@ -17,21 +17,27 @@ use App\Http\Controllers\Admin\{
     AdminCmsController
 };
 
+
 /*
 |--------------------------------------------------------------------------
 | Admin Portal Authentication Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
-});
 
-// Redirect root of admin app directly to dashboard or login
+Route::get('/login', [AdminAuthController::class, 'showLoginForm'])
+    ->name('admin.login');
+
+Route::post('/login', [AdminAuthController::class, 'login'])
+    ->name('admin.login.submit');
+
+Route::post('/logout', [AdminAuthController::class, 'logout'])
+    ->name('admin.logout');
+
+// Redirect root of admin app
 Route::get('/', function () {
     return redirect()->route('admin.dashboard');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -47,9 +53,10 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
     Route::resource('bookings', AdminBookingController::class)->only(['index', 'show']);
     Route::post('bookings/{booking}/assign', [AdminBookingController::class, 'assignPujari'])->name('bookings.assign');
     Route::post('bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
-
-    // Pooja Catalog Management
+   
+	// Pooja Catalog Management
     Route::resource('poojas', AdminPoojaCatalogController::class);
+    Route::patch('poojas/{pooja}/toggle-status', [AdminPoojaCatalogController::class, 'toggleStatus'])->name('poojas.toggle-status');
 
     // E-Commerce Orders & Fulfillment
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);
