@@ -12,17 +12,10 @@ class PoojaDetail extends Model
 
     protected $table = 'pooja_details';
 
-    protected $fillable = [
-        'pooja_id',
-        'significance',
-        'procedure',
-        'duration_minutes',
-        'samagri_list',
-        'instructions',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
-        'samagri_list' => 'array',
+        'samagri_list'     => 'array',
         'duration_minutes' => 'integer',
     ];
 

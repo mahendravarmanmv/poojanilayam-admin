@@ -92,19 +92,21 @@
                 <tbody>
                     @forelse($poojas as $pooja)
                         <tr>
-                            <td class="ps-4">
-                                @if($pooja->primaryMedia && $pooja->primaryMedia->file_name)
-                                    <img src="/images/poojas/{{ $pooja->primaryMedia->file_name }}" 
-                                         alt="{{ $pooja->name }}" 
-                                         class="rounded object-fit-cover shadow-sm border" 
-                                         width="50" height="50">
-                                @else
-                                    <div class="rounded bg-light border d-flex align-items-center justify-content-center text-muted" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="bi bi-image"></i>
-                                    </div>
-                                @endif
-                            </td>
+                            <!-- Replace Image cell (lines 98-109) -->
+<td class="ps-4">
+    @if($pooja->primaryMedia && $pooja->primaryMedia->file_path)
+        <img src="{{ asset($pooja->primaryMedia->file_path) }}" 
+             alt="{{ $pooja->name }}" 
+             class="rounded object-fit-cover shadow-sm border" 
+             width="50" height="50"
+             onerror="this.onerror=null; this.src='https://placehold.co/50x50?text=No+Img';">
+    @else
+        <div class="rounded bg-light border d-flex align-items-center justify-content-center text-muted" 
+             style="width: 50px; height: 50px;">
+            <i class="bi bi-image"></i>
+        </div>
+    @endif
+</td>
                             <td>
                                 <div class="fw-semibold text-dark">{{ $pooja->name }}</div>
                                 <div class="text-muted small">
@@ -113,34 +115,38 @@
                             </td>
                             <td>
                                 @if($pooja->pricings->isNotEmpty())
+                                    @php
+                                        $firstTier = $pooja->pricings->firstWhere('is_default', true) ?? $pooja->pricings->first();
+                                        $baseAmount = $firstTier ? ($firstTier->amount ?? $firstTier->price ?? 0) : 0;
+                                        $discountAmount = $firstTier ? ($firstTier->discount_amount ?? 0) : 0;
+                                        $finalSpecial = ($discountAmount > 0) ? ($baseAmount - $discountAmount) : null;
+                                        $tierCount = $pooja->pricings->count();
+                                    @endphp
                                     <div>
                                         <span class="fw-bold text-success">
-                                            ₹{{ number_format($pooja->pricings->first()->price, 2) }}
+                                            ₹{{ number_format($baseAmount, 2) }}
                                         </span>
-                                        @if($pooja->pricings->first()->special_price)
+                                        @if($finalSpecial)
                                             <span class="text-decoration-line-through text-muted small ms-1">
-                                                ₹{{ number_format($pooja->pricings->first()->special_price, 2) }}
+                                                ₹{{ number_format($finalSpecial, 2) }}
                                             </span>
                                         @endif
                                     </div>
                                     <span class="badge bg-light text-secondary border">
-                                        {{ $pooja->pricings_count }} {{ Str::plural('package', $pooja->pricings_count) }}
+                                        {{ $tierCount }} {{ Str::plural('package', $tierCount) }}
                                     </span>
                                 @else
                                     <span class="text-muted small">No pricing set</span>
                                 @endif
                             </td>
-                            <td>
-                                @if($pooja->is_popular)
-                                    <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Popular</span>
-                                @endif
-                                @if($pooja->is_temple_pooja)
-                                    <span class="badge bg-info text-white"><i class="bi bi-bank me-1"></i>Temple</span>
-                                @endif
-                                @if(!$pooja->is_popular && !$pooja->is_temple_pooja)
-                                    <span class="text-muted small">—</span>
-                                @endif
-                            </td>
+                          
+<td>
+    @if($pooja->is_featured)
+        <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Popular</span>
+    @else
+        <span class="text-muted small">—</span>
+    @endif
+</td>
                             <td>
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input status-toggle" type="checkbox" role="switch"

@@ -13,11 +13,11 @@ class PoojaCategory extends Model
     protected $table = 'pooja_categories';
 
     protected $fillable = [
+		'category_code',
         'name',
         'slug',
         'description',
         'image_url',
-        'status',
     ];
 
     public function poojas(): HasMany

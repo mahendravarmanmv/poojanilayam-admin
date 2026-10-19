@@ -57,6 +57,8 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 	// Pooja Catalog Management
     Route::resource('poojas', AdminPoojaCatalogController::class);
     Route::patch('poojas/{pooja}/toggle-status', [AdminPoojaCatalogController::class, 'toggleStatus'])->name('poojas.toggle-status');
+    Route::post('pooja-categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('pooja-categories.quick-store');
+    Route::post('categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('categories.quickStore');
 
     // E-Commerce Orders & Fulfillment
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);

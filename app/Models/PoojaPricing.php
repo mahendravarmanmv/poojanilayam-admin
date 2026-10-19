@@ -14,23 +14,32 @@ class PoojaPricing extends Model
 
     protected $fillable = [
         'pooja_id',
-        'title',
-        'price',
-        'special_price',
-        'description',
-        'includes_samagri',
+        'currency_id',
+        'pricing_type',
+        'amount',
+        'discount_amount',
+        'effective_from',
+        'effective_until',
         'is_default',
+        'is_active',
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'special_price' => 'decimal:2',
-        'includes_samagri' => 'boolean',
-        'is_default' => 'boolean',
+        'amount'          => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'is_default'      => 'boolean',
+        'is_active'       => 'boolean',
+        'effective_from'  => 'datetime',
+        'effective_until' => 'datetime',
     ];
 
     public function pooja(): BelongsTo
     {
         return $this->belongsTo(Pooja::class, 'pooja_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 }
