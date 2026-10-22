@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\{
     AdminPoojaCatalogController,
     AdminOrderController,
     AdminProductController,
+    AdminProductCategoryController,
     AdminPujariVerificationController,
     AdminTempleController,
     AdminAstrologyController,
@@ -67,6 +68,7 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 
     // Products & Inventory
     Route::resource('products', AdminProductController::class);
+    Route::resource('product-categories', AdminProductCategoryController::class)->except(['show']);
 
     // Pujari Management (Full CRUD + Status Verification)
     Route::resource('verifications/pujaris', AdminPujariVerificationController::class)

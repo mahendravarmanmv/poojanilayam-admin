@@ -2,59 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Product extends Model
 {
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
-        'product_category_id',
-        'brand_id',
-        'name',
-        'slug',
-        'sku',
-        'description',
-        'is_active',
+        'product_category_id', 'product_code', 'sku', 'name', 'slug',
+        'short_description', 'description', 'product_type', 'brand',
+        'unit', 'weight', 'weight_unit', 'is_digital', 'featured', 'active', 'sort_order',
     ];
 
-    public function brand(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Brand::class, 'brand_id');
+        return ['weight' => 'decimal:3', 'is_digital' => 'boolean', 'featured' => 'boolean', 'active' => 'boolean', 'sort_order' => 'integer'];
     }
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(ProductCategory::class, 'product_category_id');
-    }
-
-    public function price(): HasOne
-    {
-        return $this->hasOne(ProductPrice::class)->where('is_default', true)->withDefault([
-            'price' => 0.00,
-        ]);
-    }
-
-    public function prices(): HasMany
-    {
-        return $this->hasMany(ProductPrice::class);
-    }
-
-    public function inventory(): HasOne
-    {
-        return $this->hasOne(Inventory::class)->withDefault([
-            'quantity_on_hand' => 0,
-        ]);
-    }
-
-    public function inventories(): HasMany
-    {
-        return $this->hasMany(Inventory::class);
-    }
-
-    public function images(): HasMany
-    {
-        return $this->hasMany(ProductImage::class);
-    }
+    public function category(): BelongsTo { return $this->belongsTo(ProductCategory::class, 'product_category_id'); }
+    public function images(): HasMany { return $this->hasMany(ProductImage::class); }
+    public function prices(): HasMany { return $this->hasMany(ProductPrice::class); }
+    public function inventories(): HasMany { return $this->hasMany(Inventory::class); }
 }

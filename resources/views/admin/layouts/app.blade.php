@@ -56,6 +56,11 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.product-categories.index') }}" class="nav-link text-white {{ request()->routeIs('admin.product-categories.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-grid me-2"></i> Store Categories
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('admin.verifications.pujaris.index') }}" class="nav-link text-white {{ request()->routeIs('admin.verifications.pujaris.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-person-badge me-2"></i> Pujari Verifications
                 </a>
