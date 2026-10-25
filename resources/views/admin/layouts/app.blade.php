@@ -66,6 +66,11 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.donations.index') }}" class="nav-link text-white {{ request()->routeIs('admin.donations.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-heart-fill me-2"></i> Donations
+                </a>
+            </li>
+            {{-- <li>
                 <a href="{{ route('admin.temples.index') }}" class="nav-link text-white {{ request()->routeIs('admin.temples.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-bank me-2"></i> Temples
                 </a>
@@ -80,7 +85,7 @@
                     <i class="bi bi-camera-video me-2"></i> Digital & Live Poojas
                 </a>
             </li>
-            <li>
+            {{-- <li>
                 <a href="{{ route('admin.settlements.index') }}" class="nav-link text-white {{ request()->routeIs('admin.settlements.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-wallet2 me-2"></i> Finance & Payouts
                 </a>
@@ -94,7 +99,7 @@
                 <a href="{{ route('admin.cms.banners') }}" class="nav-link text-white {{ request()->routeIs('admin.cms.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-window-sidebar me-2"></i> CMS Banners
                 </a>
-            </li>
+            </li> --}}
         </ul>
 
         <hr class="border-secondary mt-3 mb-3">

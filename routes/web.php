@@ -15,7 +15,9 @@ use App\Http\Controllers\Admin\{
     AdminDigitalPoojaController,
     AdminSettlementController,
     AdminSupportController,
-    AdminCmsController
+    AdminCmsController,
+	AdminDonationController,
+	AdminDonationTypeController
 };
 
 
@@ -46,6 +48,14 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+	
+	// Donations Management
+	Route::resource('donations', AdminDonationController::class)
+	->only(['index', 'show']);
+	
+	// Donation Types Management
+    Route::resource('donation-types', AdminDonationTypeController::class)
+        ->except(['show']);
     
     // Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
