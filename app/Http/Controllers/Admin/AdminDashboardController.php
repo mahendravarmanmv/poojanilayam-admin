@@ -28,7 +28,7 @@ class AdminDashboardController extends Controller
         ];
 
         $recentBookings = Booking::with(['user', 'pooja'])->latest()->limit(5)->get();
-        $recentOrders   = Order::with('user')->latest()->limit(5)->get();
+        $recentOrders = Order::with('customerProfile')->latest()->limit(5)->get();
         $pendingTickets = SupportTicket::with('user')->where('status', 'open')->latest()->limit(5)->get();
 
         return view('admin.dashboard.index', compact('stats', 'recentBookings', 'recentOrders', 'pendingTickets'));
