@@ -2,7 +2,6 @@
 @section('title', 'Product Categories')
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"><div><h4 class="fw-bold mb-1">Store Product Categories</h4><p class="text-muted mb-0">Categories shown in Store filters.</p></div><a href="{{ route('admin.product-categories.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Add Category</a></div>
-@if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 <div class="card border-0 shadow-sm mb-3"><div class="card-body"><form method="GET" class="d-flex gap-2"><input type="search" name="search" class="form-control" value="{{ request('search') }}" placeholder="Search category name or code"><button class="btn btn-primary">Search</button><a href="{{ route('admin.product-categories.index') }}" class="btn btn-outline-secondary">Clear</a></form></div></div>
 <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Category</th><th>Code</th><th>Parent</th><th>Products</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody>

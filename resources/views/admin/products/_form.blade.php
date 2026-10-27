@@ -87,7 +87,7 @@
         <label class="form-label fw-semibold" for="image">Product image (JPG, PNG or WebP; max 5 MB)</label>
         <input id="image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="form-control @error('image') is-invalid @enderror">
         @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        @if($currentImage)<div class="mt-2"><img src="{{ asset($currentImage->file_path) }}" alt="{{ $currentImage->alt_text ?: $product->name }}" style="width:90px;height:90px;object-fit:cover" class="rounded border"><small class="d-block text-muted">Uploading a new image replaces the current primary image.</small></div>@endif
+        @if($currentImage)<div class="mt-2"><img src="{{ 'https://poojago.com/' . ltrim($currentImage->file_path, '/') }}" alt="{{ $currentImage->alt_text ?: $product->name }}" style="width:90px;height:90px;object-fit:cover" class="rounded border"><small class="d-block text-muted">Uploading a new image replaces the current primary image.</small></div>@endif
     </div>
     <div class="col-md-6 d-flex flex-wrap gap-4 align-items-center pt-3">
         <div class="form-check form-switch">
