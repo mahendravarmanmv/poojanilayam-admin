@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\{
     AdminSupportController,
     AdminCmsController,
 	AdminDonationController,
+	AdminReviewController,
 	AdminDonationTypeController
 };
 
@@ -56,6 +57,16 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 	// Donation Types Management
     Route::resource('donation-types', AdminDonationTypeController::class)
         ->except(['show']);
+		
+	// Reviews & Ratings Management
+	Route::resource('reviews', AdminReviewController::class)
+	->only(['index', 'show']);
+	
+	Route::patch('reviews/{review}/approve', [AdminReviewController::class, 'approve'])
+    ->name('reviews.approve');
+
+	Route::patch('reviews/{review}/reject', [AdminReviewController::class, 'reject'])
+    ->name('reviews.reject');
     
     // Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');

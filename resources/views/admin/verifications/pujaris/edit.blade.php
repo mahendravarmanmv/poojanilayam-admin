@@ -74,7 +74,7 @@
                         <input type="file" name="profile_photo" class="form-control" accept="image/*">
                         @if ($pujari->user?->profile?->profile_photo)
                             <div class="mt-2 d-flex align-items-center gap-2">
-                                <img src="https://poojanilayam.co.in/{{ $pujari->user->profile->profile_photo }}" alt="Preview" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
+                                <img src="https://poojago.com/{{ $pujari->user->profile->profile_photo }}" alt="Preview" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;">
                                 <span class="text-muted small">{{ $pujari->user->profile->profile_photo }}</span>
                             </div>
                         @endif
