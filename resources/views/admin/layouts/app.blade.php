@@ -42,7 +42,7 @@
             </li>
             <li>
                 <a href="{{ route('admin.poojas.index') }}" class="nav-link text-white {{ request()->routeIs('admin.poojas.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-flower1 me-2"></i> Pooja Catalog
+                    <i class="bi bi-flower1 me-2"></i> Poojas
                 </a>
             </li>
             <li>
@@ -52,7 +52,7 @@
             </li>
             <li>
                 <a href="{{ route('admin.products.index') }}" class="nav-link text-white {{ request()->routeIs('admin.products.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-tags me-2"></i> Product Catalog
+                    <i class="bi bi-tags me-2"></i> Store
                 </a>
             </li>
             <li>
@@ -62,7 +62,7 @@
             </li>
             <li>
                 <a href="{{ route('admin.verifications.pujaris.index') }}" class="nav-link text-white {{ request()->routeIs('admin.verifications.pujaris.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-person-badge me-2"></i> Pujari Verifications
+                    <i class="bi bi-person-badge me-2"></i> Priests
                 </a>
             </li>
             <li>

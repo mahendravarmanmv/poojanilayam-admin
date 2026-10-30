@@ -61,12 +61,18 @@
                     <div>{{ $customer?->email ?? '—' }}</div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="text-muted small">Reviewed Pooja / Item</label>
-                    <div class="fw-semibold">
-                        {{ $item?->name ?? $item?->title ?? class_basename($review->reviewable_type) }}
-                    </div>
-                </div>
+				<div class="col-md-6">
+				<label class="text-muted small">Reviewed Item</label>
+				<div class="fw-semibold">
+				@if ($item instanceof \App\Models\PujariProfile)
+				Priest: {{ $item->display_name }}
+				@elseif ($item instanceof \App\Models\Pooja)
+				Pooja: {{ $item->name ?? $item->title ?? 'Pooja' }}
+				@else
+				{{ $item?->name ?? $item?->title ?? class_basename($review->reviewable_type) }}
+				@endif
+				</div>
+				</div>
 
                 <div class="col-md-6">
                     <label class="text-muted small">Rating</label>

@@ -92,6 +92,7 @@ class AdminPujariVerificationController extends Controller
             'display_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'nullable|string|max:20',
+			'location' => 'nullable|string|max:255',
             'experience_years' => 'required|integer|min:0|max:70',
             'bio' => 'nullable|string|max:2000',
             'specialization' => 'nullable|string|max:255',
@@ -104,12 +105,13 @@ class AdminPujariVerificationController extends Controller
 
         DB::transaction(function () use ($request, $validated) {
             // 1. Create User
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make(Str::random(16)),
-                'user_type' => 'pujari',
-            ]);
+			$user = User::create([
+			'name' => $validated['name'],
+			'email' => $validated['email'],
+			'mobile' => $validated['phone'] ?? null,
+			'password' => Hash::make(Str::random(16)),
+			'user_type' => 'pujari',
+			]);
 
             // 2. Upload photo
             $photoPath = null;
@@ -138,16 +140,13 @@ class AdminPujariVerificationController extends Controller
                 'user_id' => $user->id,
                 'pujari_number' => $pujariNumber,
                 'display_name' => $validated['display_name'],
+				'location' => $validated['location'] ?? null,
                 'experience_years' => $validated['experience_years'],
                 'bio' => $validated['bio'] ?? null,
                 'is_active' => $isActive,
                 'profile_status' => 'active',
                 'verification_status' => $validated['verification_status'],
             ];
-
-            if (Schema::hasColumn('pujari_profiles', 'phone')) {
-                $pujariData['phone'] = $validated['phone'] ?? null;
-            }
 
             $priest = PujariProfile::create($pujariData);
 
@@ -199,14 +198,16 @@ class AdminPujariVerificationController extends Controller
         $selectedLanguages = $pujari->languages->pluck('language_id')->map(fn($v) => (int)$v)->toArray();
         $specialization = $pujari->experiences->pluck('title')->first() ?? '';
 
-        $phone = $pujari->phone ?? '';
+        $phone = $pujari->user?->mobile ?? '';
+		$location = $pujari->location ?? '';
 
         return view('admin.verifications.pujaris.edit', compact(
             'pujari',
             'languages',
             'selectedLanguages',
             'specialization',
-            'phone'
+            'phone',
+			'location'
         ));
     }
 
@@ -221,6 +222,7 @@ class AdminPujariVerificationController extends Controller
             'display_name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . ($user->id ?? 0),
             'phone' => 'nullable|string|max:20',
+			'location' => 'nullable|string|max:255',
             'experience_years' => 'required|integer|min:0|max:70',
             'bio' => 'nullable|string|max:2000',
             'specialization' => 'nullable|string|max:255',
@@ -233,12 +235,14 @@ class AdminPujariVerificationController extends Controller
 
         DB::transaction(function () use ($request, $validated, $pujari, $user, $profile) {
             // Update User
-            if ($user) {
-                $user->update([
-                    'name' => $validated['name'],
-                    'email' => $validated['email'],
-                ]);
-            }
+            // Update User
+			if ($user) {
+			$user->update([
+				'name' => $validated['name'],
+				'email' => $validated['email'],
+				'mobile' => $validated['phone'] ?? null,
+			]);
+			}
 
             // Photo Replacement
             if ($request->hasFile('profile_photo')) {
@@ -274,16 +278,13 @@ class AdminPujariVerificationController extends Controller
             // Update Pujari Profile
             $pujariData = [
                 'display_name' => $validated['display_name'],
+				'location' => $validated['location'] ?? null,
                 'experience_years' => $validated['experience_years'],
                 'bio' => $validated['bio'] ?? null,
                 'is_active' => $isActive,
                 'profile_status' => 'active',
                 'verification_status' => $validated['verification_status'],
-            ];
-
-            if (Schema::hasColumn('pujari_profiles', 'phone')) {
-                $pujariData['phone'] = $validated['phone'] ?? null;
-            }
+            ];          
 
             $pujari->update($pujariData);
 

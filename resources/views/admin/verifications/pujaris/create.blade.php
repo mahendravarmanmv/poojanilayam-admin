@@ -48,6 +48,13 @@
                         <label class="form-label fw-semibold">Phone Number</label>
                         <input type="text" name="phone" class="form-control" value="{{ old('phone') }}" placeholder="+91 9876543210">
                     </div>
+					
+					<div class="col-md-6">
+					<label for="location" class="form-label fw-semibold">
+					Location
+					</label>
+					<input type="text"  name="location" id="location" class="form-control" value="{{ old('location') }}" maxlength="255" placeholder="e.g. Hyderabad, Telangana">
+					</div>
 
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Years of Experience <span class="text-danger">*</span></label>
