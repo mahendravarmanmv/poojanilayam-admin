@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\{
     AdminProductController,
     AdminProductCategoryController,
     AdminPujariVerificationController,
+	AdminPujariServiceController,
+	AdminPujariAvailabilityController,
     AdminTempleController,
     AdminAstrologyController,
     AdminDigitalPoojaController,
@@ -97,6 +99,40 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 
     Route::post('verifications/pujaris/{pujari}/verify', [AdminPujariVerificationController::class, 'updateVerification'])
         ->name('verifications.pujaris.update-status');
+		
+	// Priest Services Management
+	Route::resource(
+	'verifications/pujaris/{pujari}/services',
+	AdminPujariServiceController::class
+	)
+	->except(['show'])
+	->names('verifications.pujaris.services');
+
+	Route::patch(
+	'verifications/pujaris/{pujari}/services/{service}/toggle-status',
+	[AdminPujariServiceController::class, 'toggleStatus']
+	)->name('verifications.pujaris.services.toggle-status');
+	
+	Route::get(
+	'verifications/pujaris/{pujari}/availability',
+	[AdminPujariAvailabilityController::class, 'index']
+	)->name('verifications.pujaris.availability.index');
+	
+	// Priest Availability Management
+	Route::post(
+	'verifications/pujaris/{pujari}/availability',
+	[AdminPujariAvailabilityController::class, 'store']
+	)->name('verifications.pujaris.availability.store');
+
+	Route::put(
+	'verifications/pujaris/{pujari}/availability/{availability}',
+	[AdminPujariAvailabilityController::class, 'update']
+	)->name('verifications.pujaris.availability.update');
+
+	Route::delete(
+	'verifications/pujaris/{pujari}/availability/{availability}',
+	[AdminPujariAvailabilityController::class, 'destroy']
+	)->name('verifications.pujaris.availability.destroy');
 
     // Temples & Verification
     Route::resource('temples', AdminTempleController::class)->only(['index', 'show']);

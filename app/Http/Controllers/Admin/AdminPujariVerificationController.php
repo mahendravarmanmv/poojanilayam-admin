@@ -315,10 +315,8 @@ class AdminPujariVerificationController extends Controller
                         'language_id'       => (int) $langId,
                     ]);
                 }
-            }
-
-            // Sync availability
-            $this->syncDefaultAvailability($pujari->id, $isActive);
+            }          
+            
         });
 
         return redirect()->route('admin.verifications.pujaris.index')

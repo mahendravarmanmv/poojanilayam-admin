@@ -55,4 +55,9 @@ class PujariProfile extends Model
     {
         return $this->hasMany(PujariAvailability::class, 'pujari_profile_id');
     }
+	
+	public function services(): HasMany
+	{
+    return $this->hasMany(PujariService::class, 'pujari_profile_id');
+	}
 }

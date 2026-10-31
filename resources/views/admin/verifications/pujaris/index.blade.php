@@ -63,6 +63,17 @@
                         <a href="{{ route('admin.verifications.pujaris.edit', $p) }}" class="btn btn-sm btn-outline-secondary me-1" title="Edit Priest">
                             <i class="bi bi-pencil"></i>
                         </a>
+						<a href="{{ route('admin.verifications.pujaris.services.index', $p->id) }}"
+						class="btn btn-sm btn-outline-primary me-1"
+						title="Manage Services">
+						<i class="bi bi-list-check"></i>
+						</a>
+
+						<a href="{{ route('admin.verifications.pujaris.availability.index', $p->id) }}"
+						class="btn btn-sm btn-outline-success me-1"
+						title="Manage Availability">
+						<i class="bi bi-calendar-week"></i>
+						</a>
                         <form action="{{ route('admin.verifications.pujaris.destroy', $p) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this priest profile?');">
                             @csrf
                             @method('DELETE')
