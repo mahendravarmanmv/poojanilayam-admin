@@ -70,21 +70,27 @@
                     <i class="bi bi-heart-fill me-2"></i> Donations
                 </a>
             </li>
+			<li>
+			<a href="{{ route('admin.taxes.index') }}"
+			class="nav-link text-white {{ request()->routeIs('admin.taxes.*') ? 'active bg-primary' : '' }}">
+			<i class="bi bi-percent me-2"></i> Tax Management
+			</a>
+			</li>
             {{-- <li>
                 <a href="{{ route('admin.temples.index') }}" class="nav-link text-white {{ request()->routeIs('admin.temples.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-bank me-2"></i> Temples
                 </a>
-            </li>
+            </li> --}}
             <li>
                 <a href="{{ route('admin.astrology.index') }}" class="nav-link text-white {{ request()->routeIs('admin.astrology.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-stars me-2"></i> Astrology Sessions
+                    <i class="bi bi-stars me-2"></i> Astrology
                 </a>
             </li>
-            <li>
+            {{-- <li>
                 <a href="{{ route('admin.digital-poojas.index') }}" class="nav-link text-white {{ request()->routeIs('admin.digital-poojas.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-camera-video me-2"></i> Digital & Live Poojas
                 </a>
-            </li>
+            </li> --}}
             {{-- <li>
                 <a href="{{ route('admin.settlements.index') }}" class="nav-link text-white {{ request()->routeIs('admin.settlements.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-wallet2 me-2"></i> Finance & Payouts

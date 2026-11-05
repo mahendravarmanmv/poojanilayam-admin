@@ -10,15 +10,16 @@ use App\Http\Controllers\Admin\{
     AdminProductController,
     AdminProductCategoryController,
     AdminPujariVerificationController,
-	AdminPujariServiceController,
+	AdminPujariServiceController,	
 	AdminPujariAvailabilityController,
-    AdminTempleController,
+    //AdminTempleController,
     AdminAstrologyController,
     AdminDigitalPoojaController,
     AdminSettlementController,
     AdminSupportController,
     AdminCmsController,
 	AdminDonationController,
+	AdminTaxController,
 	AdminReviewController,
 	AdminDonationTypeController
 };
@@ -55,6 +56,10 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 	// Donations Management
 	Route::resource('donations', AdminDonationController::class)
 	->only(['index', 'show']);
+	
+	// Tax Management
+	Route::resource('taxes', AdminTaxController::class)
+	->except(['show']);
 	
 	// Donation Types Management
     Route::resource('donation-types', AdminDonationTypeController::class)
@@ -135,8 +140,8 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 	)->name('verifications.pujaris.availability.destroy');
 
     // Temples & Verification
-    Route::resource('temples', AdminTempleController::class)->only(['index', 'show']);
-    Route::post('temples/{temple}/verify', [AdminTempleController::class, 'verify'])->name('temples.verify');
+    /*Route::resource('temples', AdminTempleController::class)->only(['index', 'show']);
+    Route::post('temples/{temple}/verify', [AdminTempleController::class, 'verify'])->name('temples.verify');*/
 
     // Astrology Consultations
     Route::resource('astrology', AdminAstrologyController::class)->only(['index', 'show']);
