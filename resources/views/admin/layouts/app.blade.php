@@ -40,6 +40,12 @@
                     <i class="bi bi-calendar-check me-2"></i> Pooja Bookings
                 </a>
             </li>
+			<li>
+			<a href="{{ route('admin.priest-bookings.index') }}"
+			class="nav-link text-white {{ request()->routeIs('admin.priest-bookings.*') ? 'active bg-primary' : '' }}">
+			<i class="bi bi-person-check me-2"></i> Priest Bookings
+			</a>
+			</li>
             <li>
                 <a href="{{ route('admin.poojas.index') }}" class="nav-link text-white {{ request()->routeIs('admin.poojas.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-flower1 me-2"></i> Poojas
@@ -62,7 +68,7 @@
             </li>
             <li>
                 <a href="{{ route('admin.verifications.pujaris.index') }}" class="nav-link text-white {{ request()->routeIs('admin.verifications.pujaris.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-person-badge me-2"></i> Priests
+                    <i class="bi bi-person-badge me-2"></i> Priests / Pujaris
                 </a>
             </li>
             <li>
