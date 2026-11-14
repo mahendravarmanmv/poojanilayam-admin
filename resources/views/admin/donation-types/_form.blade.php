@@ -57,6 +57,39 @@
 </div>
 
 <div class="mb-3">
+    <label for="image" class="form-label">Donation Type Image</label>
+
+    <input
+        type="file"
+        name="image"
+        id="image"
+        class="form-control @error('image') is-invalid @enderror"
+        accept="image/jpeg,image/png,image/webp"
+    >
+
+    <small class="text-muted">
+        Allowed formats: JPG, JPEG, PNG, WEBP. Maximum size: 5MB.
+    </small>
+
+    @error('image')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+
+    @if (!empty($donationType->image_path))
+        <div class="mt-3">
+            <label class="form-label d-block">Current Image</label>
+
+            <img
+                src="{{ 'https://poojago.com/' . ltrim($donationType->image_path, '/') }}"
+                alt="{{ $donationType->name }}"
+                class="img-thumbnail"
+                style="max-width: 180px; max-height: 140px; object-fit: contain;"
+            >
+        </div>
+    @endif
+</div>
+
+<div class="mb-3">
     <label for="status" class="form-label">Status</label>
     <select name="status" id="status" class="form-select" required>
         <option value="active"

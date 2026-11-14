@@ -16,6 +16,7 @@ class DonationType extends Model
         'name',
         'slug',
         'description',
+		'image_path',
         'status',
         'sort_order',
     ];

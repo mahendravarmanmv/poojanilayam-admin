@@ -10,7 +10,7 @@
     @if ($errors->any())
         <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
     @endif
-    <form method="POST" action="{{ route('admin.donation-types.update', $donationType) }}">
+    <form method="POST" action="{{ route('admin.donation-types.update', $donationType) }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')
 
