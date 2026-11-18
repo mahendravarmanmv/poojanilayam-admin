@@ -19,9 +19,9 @@ class PoojaCategory extends Model
         'description',
         'image_url',
     ];
-
-    public function poojas(): HasMany
-    {
-        return $this->hasMany(Pooja::class, 'category_id');
-    }
+	
+	public function poojas(): HasMany
+	{
+	return $this->hasMany(Pooja::class, 'pooja_category_id');
+	}
 }

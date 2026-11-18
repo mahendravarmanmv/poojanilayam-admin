@@ -173,8 +173,8 @@
                                         'title'         => $p->pricing_type ?? 'Standard Package',
                                         'price'         => $p->amount,
                                         'special_price' => ($p->discount_amount > 0) ? ($p->amount -$p->discount_amount) : '',
-                                        'description'   => '',
-                                        'includes_samagri' => 1,
+                                        'description'   => $p->description,
+										'includes_samagri' => $p->includes_samagri,
                                     ];
                                 }
                             }

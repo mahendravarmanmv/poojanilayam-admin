@@ -72,6 +72,8 @@ class AdminPoojaCatalogController extends Controller
             'pricings.*.special_price' => ['nullable', 'numeric', 'min:0'],
             'pricings.*.description'   => ['nullable', 'string', 'max:500'],
             'pricings.*.includes_samagri' => ['nullable', 'boolean'],
+			'god_ids'   => ['nullable', 'array'],
+			'god_ids.*' => ['integer', 'exists:gods,id'],
         ]);
 
         DB::transaction(function () use ($request) {
@@ -105,6 +107,9 @@ class AdminPoojaCatalogController extends Controller
                 'is_active'         => $isActive,
                 'sort_order'        => 0,
             ]);
+			
+			// Sync Associated Deities
+			$pooja->gods()->sync($request->input('god_ids', []));
 
             // 2. Insert into pooja_details with schema column detection
             $cleanedSamagri = array_values(array_filter($request->input('samagri_list', [])));
@@ -167,6 +172,8 @@ class AdminPoojaCatalogController extends Controller
                         'pricing_type'    => substr($pricingType, 0, 40),
                         'amount'          => $rawPrice,
                         'discount_amount' => $discountAmount,
+						'description'      => $pricingData['description'] ?? null,
+						'includes_samagri' => !empty($pricingData['includes_samagri']),
                         'is_default'      => $index === 0,
                         'is_active'       => 1,
                     ]);
@@ -246,6 +253,8 @@ class AdminPoojaCatalogController extends Controller
             'pricings.*.title'  => ['required', 'string', 'max:255'],
             'pricings.*.price'  => ['required', 'numeric', 'min:0'],
             'pricings.*.special_price' => ['nullable', 'numeric', 'min:0'],
+			'pricings.*.description' => ['nullable', 'string', 'max:500'],
+			'pricings.*.includes_samagri' => ['nullable', 'boolean'],
         ]);
 
         DB::transaction(function () use ($request, $pooja) {
@@ -314,6 +323,8 @@ class AdminPoojaCatalogController extends Controller
                         'pricing_type'    => substr($pricingType, 0, 40),
                         'amount'          => $rawPrice,
                         'discount_amount' => $discountAmount,
+						'description'      => $pricingData['description'] ?? null,
+						'includes_samagri' => !empty($pricingData['includes_samagri']),
                         'is_default'      => $index === 0,
                         'is_active'       => 1,
                     ]);

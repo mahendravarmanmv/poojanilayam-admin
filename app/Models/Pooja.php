@@ -70,8 +70,17 @@ class Pooja extends Model
             ->orderBy('sort_order');
     }
 
-    public function gods(): BelongsToMany
-    {
-        return $this->belongsToMany(God::class, 'god_poojas', 'pooja_id', 'god_id');
-    }
+	public function gods(): BelongsToMany
+	{
+	return $this->belongsToMany(
+		God::class,
+		'god_poojas',
+		'pooja_id',
+		'god_id'
+	)->withPivot([
+		'sort_order',
+		'is_primary',
+		'is_active',
+	])->withTimestamps();
+	}
 }

@@ -68,6 +68,41 @@
                                 <input type="number" name="duration_minutes" class="form-control" value="{{ old('duration_minutes', 90) }}" placeholder="e.g. 90">
                             </div>
                         </div>
+						
+						
+						<!-- Associated Deities (Gods) -->
+						<div class="mb-3">
+							<label class="form-label fw-semibold">Associated Deities / Gods</label>
+
+							<div class="row g-2 border rounded p-2 bg-light"
+								 style="max-height: 140px; overflow-y: auto;">
+
+								@forelse ($gods as $god)
+									<div class="col-md-4 col-sm-6">
+										<div class="form-check">
+											<input
+												class="form-check-input"
+												type="checkbox"
+												name="god_ids[]"
+												value="{{ $god->id }}"
+												id="god_{{ $god->id }}"
+												{{ in_array($god->id, old('god_ids', [])) ? 'checked' : '' }}
+											>
+
+											<label class="form-check-label small"
+												   for="god_{{ $god->id }}">
+												{{ $god->name }}
+											</label>
+										</div>
+									</div>
+								@empty
+									<div class="col-12 text-muted small">
+										No deities available.
+									</div>
+								@endforelse
+
+							</div>
+						</div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Short Description</label>

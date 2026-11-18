@@ -14,19 +14,22 @@ class PoojaPricing extends Model
 
     protected $fillable = [
         'pooja_id',
-        'currency_id',
-        'pricing_type',
-        'amount',
-        'discount_amount',
-        'effective_from',
-        'effective_until',
-        'is_default',
-        'is_active',
+		'currency_id',
+		'pricing_type',
+		'amount',
+		'discount_amount',
+		'description',
+		'includes_samagri',
+		'effective_from',
+		'effective_until',
+		'is_default',
+		'is_active',
     ];
 
     protected $casts = [
         'amount'          => 'decimal:2',
         'discount_amount' => 'decimal:2',
+		'includes_samagri' => 'boolean',
         'is_default'      => 'boolean',
         'is_active'       => 'boolean',
         'effective_from'  => 'datetime',
