@@ -68,14 +68,23 @@
                                 <input type="number" name="duration_minutes" class="form-control" value="{{ old('duration_minutes', 90) }}" placeholder="e.g. 90">
                             </div>
                         </div>
-						
-						
+					
 						<!-- Associated Deities (Gods) -->
 						<div class="mb-3">
-							<label class="form-label fw-semibold">Associated Deities / Gods</label>
+							<div class="d-flex justify-content-between align-items-center mb-1">
+								<label class="form-label fw-semibold mb-0">Associated Deities / Gods</label>
 
-							<div class="row g-2 border rounded p-2 bg-light"
-								 style="max-height: 140px; overflow-y: auto;">
+								<button type="button"
+										class="btn btn-link btn-sm p-0 text-decoration-none"
+										data-bs-toggle="modal"
+										data-bs-target="#quickGodModal">
+									+ Add Deity
+								</button>
+							</div>
+
+							<div id="gods-checkbox-container"
+							class="row g-2 border rounded p-2 bg-light"
+							style="max-height: 140px; overflow-y: auto;">
 
 								@forelse ($gods as $god)
 									<div class="col-md-4 col-sm-6">
@@ -245,11 +254,7 @@
                         <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" name="is_popular" value="1" id="is_popular" {{ old('is_popular') ? 'checked' : '' }}>
                             <label class="form-check-label" for="is_popular">Mark as Popular Pooja</label>
-                        </div>
-                        <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" name="is_temple_pooja" value="1" id="is_temple_pooja" {{ old('is_temple_pooja') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_temple_pooja">Temple Pooja Offering</label>
-                        </div>
+                        </div>                        
                     </div>
                 </div>
 
@@ -295,6 +300,7 @@
 </div>
 
 @include('admin.poojas.category-create-popup')
+@include('admin.poojas.god-create-popup')
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

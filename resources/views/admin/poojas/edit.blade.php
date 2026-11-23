@@ -72,8 +72,16 @@
 
                         <!-- Associated Deities (Gods) -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Associated Deities / Gods</label>
-                            <div class="row g-2 border rounded p-2 bg-light" style="max-height: 140px; overflow-y: auto;">
+						<div class="d-flex justify-content-between align-items-center mb-1">
+						<label class="form-label fw-semibold mb-0">Associated Deities / Gods</label>
+						<button type="button"
+						class="btn btn-link btn-sm p-0 text-decoration-none"
+						data-bs-toggle="modal"
+						data-bs-target="#quickGodModal">
+						+ Add Deity
+						</button>
+						</div>
+                            <div id="gods-checkbox-container" class="row g-2 border rounded p-2 bg-light" style="max-height: 140px; overflow-y: auto;">
                                 @php
                                     $selectedGodIds = old('god_ids',$pooja->gods->pluck('id')->toArray());
                                 @endphp
@@ -344,6 +352,8 @@
         </div>
     </div>
 </div>
+
+@include('admin.poojas.god-create-popup')
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

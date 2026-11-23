@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\{
     AdminAuthController,
     AdminDashboardController,
     AdminBookingController,
+	AdminPriestBookingController,
     AdminPoojaCatalogController,
     AdminOrderController,
     AdminProductController,
@@ -82,12 +83,17 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
     Route::resource('bookings', AdminBookingController::class)->only(['index', 'show']);
     Route::post('bookings/{booking}/assign', [AdminBookingController::class, 'assignPujari'])->name('bookings.assign');
     Route::post('bookings/{booking}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
+	
+	// Priest Bookings Management
+	Route::resource('priest-bookings', AdminPriestBookingController::class)->only(['index', 'show']);
    
 	// Pooja Catalog Management
     Route::resource('poojas', AdminPoojaCatalogController::class);
     Route::patch('poojas/{pooja}/toggle-status', [AdminPoojaCatalogController::class, 'toggleStatus'])->name('poojas.toggle-status');
     Route::post('pooja-categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('pooja-categories.quick-store');
     Route::post('categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('categories.quickStore');
+	
+	Route::post('gods/quick-store', [AdminPoojaCatalogController::class, 'quickStoreGod'])->name('gods.quickStore');
 
     // E-Commerce Orders & Fulfillment
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);

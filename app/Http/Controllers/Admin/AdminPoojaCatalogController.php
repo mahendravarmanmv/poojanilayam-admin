@@ -414,6 +414,48 @@ class AdminPoojaCatalogController extends Controller
             'category' => $category,
         ]);
     }
+	
+	public function quickStoreGod(Request $request)
+	{
+    $request->validate([
+        'name'              => ['required', 'string', 'max:255', 'unique:gods,name'],
+        'short_description' => ['nullable', 'string'],
+        'sort_order'        => ['nullable', 'integer', 'min:0'],
+    ]);
+
+    $slug = Str::slug($request->name);
+
+    // Generate unique slug
+    $originalSlug = $slug;
+    $count = 1;
+
+    while (God::where('slug', $slug)->exists()) {
+        $slug = $originalSlug . '-' . $count;
+        $count++;
+    }
+
+    // Generate unique God Code
+    $godCode = 'GOD-' . strtoupper(substr(str_replace('-', '', $slug), 0, 10));
+
+    while (God::where('god_code', $godCode)->exists()) {
+        $godCode = 'GOD-' . strtoupper(substr(str_replace('-', '', $slug), 0, 7)) . '-' . rand(100, 999);
+    }
+
+    $god = God::create([
+        'god_code'          => $godCode,
+        'name'              => $request->name,
+        'slug'              => $slug,
+        'short_description' => $request->short_description,
+        'sort_order'        => $request->sort_order ?? 0,
+        'is_featured'       => 0,
+        'is_active'         => 1,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'god'     => $god,
+    ]);
+	}
 
     public function destroy(Pooja $pooja)
     {
