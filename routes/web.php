@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\{
     AdminBookingController,
 	AdminPriestBookingController,
     AdminPoojaCatalogController,
+	AdminPoojaAvailabilityController,
     AdminOrderController,
     AdminProductController,
     AdminProductCategoryController,
@@ -94,6 +95,10 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
     Route::post('categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('categories.quickStore');
 	
 	Route::post('gods/quick-store', [AdminPoojaCatalogController::class, 'quickStoreGod'])->name('gods.quickStore');
+	
+	// Pooja Availability Management
+	Route::get('pooja-availability', [AdminPoojaAvailabilityController::class, 'index'])->name('pooja-availability.index');
+	Route::post('pooja-availability', [AdminPoojaAvailabilityController::class, 'store'])->name('pooja-availability.store');
 
     // E-Commerce Orders & Fulfillment
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);

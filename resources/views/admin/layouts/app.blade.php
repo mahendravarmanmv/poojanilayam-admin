@@ -51,6 +51,12 @@
                     <i class="bi bi-flower1 me-2"></i> Poojas
                 </a>
             </li>
+			<li>
+			<a href="{{ route('admin.pooja-availability.index') }}"
+			class="nav-link text-white {{ request()->routeIs('admin.pooja-availability.*') ? 'active bg-primary' : '' }}">
+			<i class="bi bi-calendar2-week me-2"></i> Pooja Availability
+			</a>
+			</li>
             <li>
                 <a href="{{ route('admin.orders.index') }}" class="nav-link text-white {{ request()->routeIs('admin.orders.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-box-seam me-2"></i> Store Orders

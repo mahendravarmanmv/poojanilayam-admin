@@ -13,6 +13,7 @@ class TemplePoojaSchedule extends Model
 
     protected $fillable = [
         'temple_pooja_id',
+		'pooja_id',
         'schedule_type',
         'day_of_week',
         'schedule_date',
@@ -39,4 +40,9 @@ class TemplePoojaSchedule extends Model
     {
         return $this->belongsTo(TemplePooja::class);
     }
+	
+	public function pooja(): BelongsTo
+	{
+    return $this->belongsTo(Pooja::class);
+	}
 }
