@@ -52,6 +52,20 @@
                 </a>
             </li>
 			<li>
+			<a href="{{ route('admin.pooja-categories.index') }}"
+			class="nav-link text-white {{ request()->routeIs('admin.pooja-categories.*') ? 'active bg-primary' : '' }}">
+			<i class="bi bi-folder2-open me-2"></i> Manage Pooja Categories
+			</a>
+			</li>
+			
+			<li>
+			<a href="{{ route('admin.gods.index') }}"
+			class="nav-link text-white {{ request()->routeIs('admin.gods.*') ? 'active bg-primary' : '' }}">
+			<i class="bi bi-bank me-2"></i> Manage Pooja Deities
+			</a>
+			</li>
+
+			<li>
 			<a href="{{ route('admin.pooja-availability.index') }}"
 			class="nav-link text-white {{ request()->routeIs('admin.pooja-availability.*') ? 'active bg-primary' : '' }}">
 			<i class="bi bi-calendar2-week me-2"></i> Pooja Availability
@@ -143,6 +157,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
+		
+		@if(session('error'))
+		<div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+		<i class="bi bi-exclamation-triangle-fill me-2"></i>
+		{{ session('error') }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+		@endif
 
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">

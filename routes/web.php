@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\{
     AdminBookingController,
 	AdminPriestBookingController,
     AdminPoojaCatalogController,
+	AdminPoojaCategoryController,
+	AdminGodController,
 	AdminPoojaAvailabilityController,
     AdminOrderController,
     AdminProductController,
@@ -90,6 +92,9 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
    
 	// Pooja Catalog Management
     Route::resource('poojas', AdminPoojaCatalogController::class);
+	Route::resource('pooja-categories',AdminPoojaCategoryController::class)->except(['show']);
+	// Pooja Deity Management
+	Route::resource('gods', AdminGodController::class)->except(['show']);
     Route::patch('poojas/{pooja}/toggle-status', [AdminPoojaCatalogController::class, 'toggleStatus'])->name('poojas.toggle-status');
     Route::post('pooja-categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('pooja-categories.quick-store');
     Route::post('categories/quick-store', [AdminPoojaCatalogController::class, 'quickStoreCategory'])->name('categories.quickStore');
@@ -98,7 +103,25 @@ Route::middleware(['web', 'admin'])->prefix('admin')->name('admin.')->group(func
 	
 	// Pooja Availability Management
 	Route::get('pooja-availability', [AdminPoojaAvailabilityController::class, 'index'])->name('pooja-availability.index');
+
 	Route::post('pooja-availability', [AdminPoojaAvailabilityController::class, 'store'])->name('pooja-availability.store');
+
+	Route::get('pooja-availability/{schedule}/edit', [AdminPoojaAvailabilityController::class, 'edit'])
+		->name('pooja-availability.edit');
+
+	Route::put('pooja-availability/{schedule}', [AdminPoojaAvailabilityController::class, 'update'])
+		->name('pooja-availability.update');
+
+	Route::patch('pooja-availability/{schedule}/toggle-status', [AdminPoojaAvailabilityController::class, 'toggleStatus'])
+		->name('pooja-availability.toggle-status');
+
+	Route::delete('pooja-availability/{schedule}', [AdminPoojaAvailabilityController::class, 'destroy'])->name('pooja-availability.destroy');
+	
+	Route::get('pooja-availability/{schedule}/slots',[AdminPoojaAvailabilityController::class, 'slots'])->name('pooja-availability.slots');
+	
+	Route::patch('pooja-availability/{schedule}/slots/{slot}/block',[AdminPoojaAvailabilityController::class, 'blockSlot'])->name('pooja-availability.slots.block');
+
+	Route::patch('pooja-availability/{schedule}/slots/{slot}/unblock',[AdminPoojaAvailabilityController::class, 'unblockSlot'])->name('pooja-availability.slots.unblock');
 
     // E-Commerce Orders & Fulfillment
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show']);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,5 +45,10 @@ class TemplePoojaSchedule extends Model
 	public function pooja(): BelongsTo
 	{
     return $this->belongsTo(Pooja::class);
+	}
+	
+	public function bookingSlots(): HasMany
+	{
+    return $this->hasMany(BookingSlot::class, 'temple_pooja_schedule_id');
 	}
 }
